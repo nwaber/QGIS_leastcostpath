@@ -150,7 +150,7 @@ class CostSurface(QgsProcessingAlgorithm):
 
         elif method == 2: # sullivan
             # Use the gdal:rastercalculator algorithm with a sullivan expression
-            expression = 'numpy.power(1 / cos(A * 0.0174533) , 0.1)'
+            expression = '(0.6 + 0.03 * A) * (A <= 10) + (1.9 + 0.06 * A) * ((A > 10) & (A <= 20)) + (5.4 + 0.09 * A) * ((A > 20) & (A <= 30)) + (12.6 + 0.12 * A) * ((A > 30) & (A <= 45)) + 1000 * (A > 45)'
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
