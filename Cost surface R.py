@@ -1,7 +1,7 @@
 """
 Model exported as python.
 Name : "Cost Surface"
-Group : "Example scripts"
+Group : "NHW scripts"
 With QGIS : 32802
 """
 
@@ -157,7 +157,7 @@ class CostSurface(QgsProcessingAlgorithm):
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = numpy.tan(A * 0.0174533) # slope gradient
+            G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
@@ -178,7 +178,7 @@ class CostSurface(QgsProcessingAlgorithm):
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = numpy.tan(A * 0.0174533) # slope gradient
+            G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
@@ -251,7 +251,7 @@ class CostSurface(QgsProcessingAlgorithm):
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = numpy.tan(A * 0.0174533) # slope gradient
+            G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
@@ -277,10 +277,10 @@ class CostSurface(QgsProcessingAlgorithm):
         return self.tr('Cost Surface')
 
     def group(self):
-        return self.tr('Example scripts')
+        return self.tr('NHW scripts')
 
     def groupId(self):
-        return 'examplescripts'
+        return 'NHWscripts'
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
