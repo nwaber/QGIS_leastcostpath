@@ -6,7 +6,7 @@ With QGIS : 32802
 """
 
 #Version 0.01
-#2023-04-15
+#2023-04-16
 
 from PyQt5.QtCore import QCoreApplication
 import numpy
@@ -16,6 +16,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterEnum,
+                       QgsProcessingParameterDefinition,
+                       QgsProcessingParameterFolderDestination,
+                       QgsProcessingParameterNumber,
                        QgsProcessingParameterRasterDestination)
 import processing
 
@@ -27,6 +30,13 @@ class CostSurface(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
     METHOD = 'METHOD'
     OUTPUT = 'OUTPUT'
+
+    def __init__(self):
+        super().__init__()
+        self.ADVANCED = 'ADVANCED'
+        self.BODY_WEIGHT = 'BODY_WEIGHT'
+        self.LOAD_WEIGHT = 'LOAD_WEIGHT'
+        self.WALKING_SPEED = 'WALKING_SPEED'
 
     # Define the methods for the cost calculation
     methods = ['tobler', 'herzog', 'sullivan', 'pandolf', 'minetti', 'tobler offpath', 'davey', 'rees', 'irmischer-clarke male', 'irmischer-clarke offpath male', 'irmischer-clarke female', 'irmischer-clarke offpath female', 'llobera-sluckin', 'campbell']
@@ -52,9 +62,43 @@ class CostSurface(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterRasterDestination(
                 self.OUTPUT,
-                self.tr('Cost output')
+                self.tr('Cost surface')
             )
         )
+        
+        self.addParameter(QgsProcessingParameterFolderDestination(
+            self.ADVANCED,
+            self.tr('Advanced'),
+            optional=True
+        ))
+        
+        
+        self.addParameter(QgsProcessingParameterNumber(
+            self.BODY_WEIGHT,
+            self.tr('Body weight (kg)'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=80,
+            minValue=0,
+            maxValue=200
+        ))
+
+        self.addParameter(QgsProcessingParameterNumber(
+            self.LOAD_WEIGHT,
+            self.tr('Load weight (kg)'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=20,
+            minValue=0,
+            maxValue=100
+        ))
+
+        self.addParameter(QgsProcessingParameterNumber(
+            self.WALKING_SPEED,
+            self.tr('Walking speed (km/h)'),
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=5,
+            minValue=1,
+            maxValue=10
+        ))        
 
     # Define the processAlgorithm method to execute the algorithm
     def processAlgorithm(self, parameters, context, feedback):
@@ -75,6 +119,11 @@ class CostSurface(QgsProcessingAlgorithm):
             context
         )
 
+        body_weight = self.parameterAsDouble(parameters, self.BODY_WEIGHT, context)
+        load_weight = self.parameterAsDouble(parameters, self.LOAD_WEIGHT, context)
+        walking_speed = self.parameterAsDouble(parameters, self.WALKING_SPEED, context)
+        # Convert from km/h to m/s
+        walking_speed = walking_speed / 3.6
 
         # Calculate the cost surface using the selected method
         if method == 0: # tobler
@@ -114,9 +163,9 @@ class CostSurface(QgsProcessingAlgorithm):
             # Use the gdal:rastercalculator algorithm with a pandolf expression
             expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G)'
             # Define the parameters for the pandolf formula
-            W = 80 # body weight in kg
-            L = 20 # load weight in kg
-            V = 1.2 # walking speed in m/s
+            W = body_weight # body weight in kg
+            L = load_weight # load weight in kg
+            V = walking_speed # walking speed in m/s
             G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
@@ -157,9 +206,9 @@ class CostSurface(QgsProcessingAlgorithm):
             # Use the gdal:rastercalculator algorithm with a davey expression
             expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + 0.25 * G ** 2)'
             # Define the parameters for the davey formula
-            W = 80 # body weight in kg
-            L = 20 # load weight in kg
-            V = 1.2 # walking speed in m/s
+            W = body_weight # body weight in kg
+            L = load_weight # load weight in kg
+            V = walking_speed # walking speed in m/s
             G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
@@ -178,9 +227,9 @@ class CostSurface(QgsProcessingAlgorithm):
             # Use the gdal:rastercalculator algorithm with a rees expression
             expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + G ** 2)'
             # Define the parameters for the rees formula
-            W = 80 # body weight in kg
-            L = 20 # load weight in kg
-            V = 1.2 # walking speed in m/s
+            W = body_weight # body weight in kg
+            L = load_weight # load weight in kg
+            V = walking_speed # walking speed in m/s
             G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
@@ -251,9 +300,9 @@ class CostSurface(QgsProcessingAlgorithm):
             # Use the gdal:rastercalculator algorithm with a campbell expression
             expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + G ** 2) * (1 + G ** 4)'
             # Define the parameters for the campbell formula
-            W = 80 # body weight in kg
-            L = 20 # load weight in kg
-            V = 1.2 # walking speed in m/s
+            W = body_weight # body weight in kg
+            L = load_weight # load weight in kg
+            V = walking_speed # walking speed in m/s
             G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
