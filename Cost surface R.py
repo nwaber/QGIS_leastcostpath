@@ -5,6 +5,9 @@ Group : "NHW scripts"
 With QGIS : 32802
 """
 
+#Version 0.01
+#2023-04-15
+
 from PyQt5.QtCore import QCoreApplication
 import numpy
 import math
