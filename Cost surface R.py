@@ -7,6 +7,7 @@ With QGIS : 32802
 
 from PyQt5.QtCore import QCoreApplication
 import numpy
+import math
 # Import the processing module
 from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
@@ -14,6 +15,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterRasterDestination)
 import processing
+
 
 # Define the class for the algorithm
 class CostSurface(QgsProcessingAlgorithm):
@@ -74,7 +76,7 @@ class CostSurface(QgsProcessingAlgorithm):
         # Calculate the cost surface using the selected method
         if method == 0: # tobler
             # Use the gdal:rastercalculator algorithm with a tobler expression
-            expression = '6 * exp(-3.5 * abs(tan(A * 0.0174533) + 0.05))'
+            expression = '6 * exp(-3.5 * abs(numpy.tan(A * 0.0174533) + 0.05))'
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -107,17 +109,17 @@ class CostSurface(QgsProcessingAlgorithm):
 
         elif method == 3: # pandolf
             # Use the gdal:rastercalculator algorithm with a pandolf expression
-            expression = '(1.5 * W + 2 + L) * (1.5 / V ^ 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ^ 2 * (1 + G)'
+            expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G)'
             # Define the parameters for the pandolf formula
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = tan(A * 0.0174533) # slope gradient
+            G = 'numpy.tan(A * 0.0174533)' # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
             expression = expression.replace('V', str(V))
-            expression = expression.replace('G', 'tan(A * 0.0174533)')
+            expression = expression.replace('G', 'numpy.tan(A * 0.0174533)')
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -128,7 +130,7 @@ class CostSurface(QgsProcessingAlgorithm):
             
         elif method == 4: # minetti
             # Use the gdal:rastercalculator algorithm with a minetti expression
-            expression = '1 + 0.05 * A + 0.0065 * A ^ 2'
+            expression = '1 + 0.05 * A + 0.0065 * A ** 2'
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -139,7 +141,7 @@ class CostSurface(QgsProcessingAlgorithm):
 
         elif method == 5: # tobler offpath
             # Use the gdal:rastercalculator algorithm with a tobler offpath expression
-            expression = '6 * exp(-3.5 * abs(tan(A * 0.0174533) + 0.05)) * 0.6'
+            expression = '6 * exp(-3.5 * abs(numpy.tan(A * 0.0174533) + 0.05)) * 0.6'
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -150,17 +152,17 @@ class CostSurface(QgsProcessingAlgorithm):
             
         elif method == 6: # davey
             # Use the gdal:rastercalculator algorithm with a davey expression
-            expression = '(1.5 * W + 2 + L) * (1.5 / V ^ 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ^ 2 * (1 + G) * (1 + 0.25 * G ^ 2)'
+            expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + 0.25 * G ** 2)'
             # Define the parameters for the davey formula
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = tan(A * 0.0174533) # slope gradient
+            G = numpy.tan(A * 0.0174533) # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
             expression = expression.replace('V', str(V))
-            expression = expression.replace('G', 'tan(A * 0.0174533)')
+            expression = expression.replace('G', 'numpy.tan(A * 0.0174533)')
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -171,17 +173,17 @@ class CostSurface(QgsProcessingAlgorithm):
             
         elif method == 7: # rees
             # Use the gdal:rastercalculator algorithm with a rees expression
-            expression = '(1.5 * W + 2 + L) * (1.5 / V ^ 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ^ 2 * (1 + G) * (1 + G ^ 2)'
+            expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + G ** 2)'
             # Define the parameters for the rees formula
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = tan(A * 0.0174533) # slope gradient
+            G = numpy.tan(A * 0.0174533) # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
             expression = expression.replace('V', str(V))
-            expression = expression.replace('G', 'tan(A * 0.0174533)')
+            expression = expression.replace('G', 'numpy.tan(A * 0.0174533)')
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
@@ -244,17 +246,17 @@ class CostSurface(QgsProcessingAlgorithm):
             
         elif method == 13: # campbell
             # Use the gdal:rastercalculator algorithm with a campbell expression
-            expression = '(1.5 * W + 2 + L) * (1.5 / V ^ 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ^ 2 * (1 + G) * (1 + G ^ 2) * (1 + G ^ 4)'
+            expression = '(1.5 * W + 2 + L) * (1.5 / V ** 0.5) * ((1.5 * W + L + W * L / (33.3 - L)) / W) ** 2 * (1 + G) * (1 + G ** 2) * (1 + G ** 4)'
             # Define the parameters for the campbell formula
             W = 80 # body weight in kg
             L = 20 # load weight in kg
             V = 1.2 # walking speed in m/s
-            G = tan(A * 0.0174533) # slope gradient
+            G = numpy.tan(A * 0.0174533) # slope gradient
             # Replace the parameters in the expression with their values
             expression = expression.replace('W', str(W))
             expression = expression.replace('L', str(L))
             expression = expression.replace('V', str(V))
-            expression = expression.replace('G', 'tan(A * 0.0174533)')
+            expression = expression.replace('G', 'numpy.tan(A * 0.0174533)')
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
