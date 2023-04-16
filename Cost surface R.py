@@ -6,6 +6,7 @@ With QGIS : 32802
 """
 
 from PyQt5.QtCore import QCoreApplication
+import numpy
 # Import the processing module
 from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
@@ -13,7 +14,6 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterRasterDestination)
 import processing
-import numpy as np
 
 # Define the class for the algorithm
 class CostSurface(QgsProcessingAlgorithm):
@@ -96,7 +96,7 @@ class CostSurface(QgsProcessingAlgorithm):
 
         elif method == 2: # sullivan
             # Use the gdal:rastercalculator algorithm with a sullivan expression
-            expression = 'np.power(1 / cos(A * 0.0174533) , 0.1)'
+            expression = 'numpy.power(1 / cos(A * 0.0174533) , 0.1)'
             alg_params = {
                 'INPUT_A': input,
                 'BAND_A': 1,
