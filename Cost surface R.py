@@ -47,7 +47,7 @@ class CostSurface(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
-                self.tr('Slope input (degrees)')
+                self.tr('Slope input (percent)')
             )
         )
         # Add an enum parameter for the method selection
