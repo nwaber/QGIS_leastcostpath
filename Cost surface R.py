@@ -39,7 +39,7 @@ class CostSurface(QgsProcessingAlgorithm):
         self.WALKING_SPEED = 'WALKING_SPEED'
 
     # Define the methods for the cost calculation
-    methods = ['tobler', 'herzog', 'sullivan', 'pandolf', 'minetti', 'tobler offpath', 'davey', 'rees', 'irmischer-clarke male', 'irmischer-clarke offpath male', 'irmischer-clarke female', 'irmischer-clarke offpath female', 'llobera-sluckin', 'campbell']
+    methods = ['tobler', 'herzog', 'sullivan', 'pandolf (basic)', 'minetti', 'tobler offpath', 'davey', 'rees', 'irmischer-clarke male', 'irmischer-clarke offpath male', 'irmischer-clarke female', 'irmischer-clarke offpath female', 'llobera-sluckin', 'campbell']
 
     # Define the initAlgorithm method to add the parameters
     def initAlgorithm(self, config=None):
@@ -47,7 +47,7 @@ class CostSurface(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
-                self.tr('Slope input')
+                self.tr('Slope input (degrees)')
             )
         )
         # Add an enum parameter for the method selection
